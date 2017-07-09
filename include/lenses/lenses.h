@@ -115,7 +115,7 @@ struct dot_lens_traversal
       return m_inner(m_outer(w));
    }
 
-   /*
+
    template<class OverPart>
    whole_type operator()(whole_type const& w, OverPart&& f) const
    {
@@ -124,7 +124,6 @@ struct dot_lens_traversal
          return m_inner(intermediary, f);
       });
    }
-    */
 };
 
 template<class OuterLens, class InnerLens>

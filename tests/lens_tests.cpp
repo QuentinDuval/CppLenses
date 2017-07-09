@@ -82,6 +82,7 @@ struct all_address_fields : lenses::traversal<address, std::string>
    template<class OverPart>
    whole_type operator()(whole_type const& w, OverPart&& f) const
    {
+      //TODO - Other possibility would be to apply f on the vector... more general, more risky
       auto copy = w;
       copy.m_road = f(w.m_road);
       copy.m_city = f(w.m_city);
@@ -102,6 +103,11 @@ TEST_F(LensesShould, compose_with_traversals_for_reads)
 
 TEST_F(LensesShould, compose_with_traversals_for_updates)
 {
-   //auto all_strings = dot(address_lens(), all_address_fields());
-
+   auto all_strings = dot(address_lens(), all_address_fields());
+   auto new_account = all_strings(sample_account(), add_exclamation_mark);
+   auto result = all_strings(new_account);
+   ASSERT_EQ(3, result.size());
+   EXPECT_EQ("Road!", result[0]);
+   EXPECT_EQ("City!", result[1]);
+   EXPECT_EQ("State!", result[2]);
 }
