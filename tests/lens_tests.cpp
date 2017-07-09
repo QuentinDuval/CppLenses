@@ -3,6 +3,8 @@
 #include "billing_account.h"
 #include "lenses/lenses.h"
 
+#include <vector>
+
 
 // -----------------------------------------------------------------------------
 // Test Fixture
@@ -39,7 +41,7 @@ static std::string add_exclamation_mark(std::string const& s)
 }
 
 // -----------------------------------------------------------------------------
-// Tests
+// Tests (Lens)
 // -----------------------------------------------------------------------------
 
 TEST_F(LensesShould, read_direct_field)
@@ -64,4 +66,39 @@ TEST_F(LensesShould, compose_into_nested_mutations)
    auto billing_account_road = dot(address_lens(), road_lens());
    auto new_billing_account = billing_account_road(sample_account(), add_exclamation_mark);
    EXPECT_EQ("Road!", billing_account_road(new_billing_account));
+}
+
+// -----------------------------------------------------------------------------
+// Tests (Traversal)
+// -----------------------------------------------------------------------------
+
+struct all_address_fields : lenses::traversal<address, std::string>
+{
+   std::vector<part_type> operator()(whole_type const& w)
+   {
+      return { w.m_road, w.m_city, w.m_state };
+   }
+
+   template<class OverPart>
+   whole_type operator()(whole_type const& w, OverPart&& f) const
+   {
+      auto copy = w;
+      copy.m_road = f(w.m_road);
+      copy.m_city = f(w.m_city);
+      copy.m_state = f(w.m_state);
+      return copy;
+   }
+};
+
+TEST_F(LensesShould, compose_with_traversals_for_reads)
+{
+   auto all_strings = dot(address_lens(), all_address_fields());
+   // auto result = all_strings(sample_account());
+
+}
+
+TEST_F(LensesShould, compose_with_traversals_for_updates)
+{
+   auto all_strings = dot(address_lens(), all_address_fields());
+
 }

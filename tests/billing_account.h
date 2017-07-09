@@ -7,6 +7,8 @@
 
 // -----------------------------------------------------------------------------
 // Example of data structures
+// * No need to make the member const: const the structure will do it.
+// * Move the const out also allows to do transient-like manipulations.
 // -----------------------------------------------------------------------------
 
 using uuid = std::string;

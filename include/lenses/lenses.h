@@ -65,6 +65,8 @@ private:
  * @tparam OuterLens
  * @tparam InnerLens
  */
+namespace details
+{
 template<class OuterLens, class InnerLens>
 struct dot_lens
 {
@@ -91,11 +93,12 @@ struct dot_lens
       });
    }
 };
+}
 
 template<class OuterLens, class InnerLens>
-dot_lens<OuterLens, InnerLens> dot(OuterLens const& o, InnerLens const& i)
+details::dot_lens<OuterLens, InnerLens> dot(OuterLens const& o, InnerLens const& i)
 {
-   return dot_lens<OuterLens, InnerLens>(o, i);
+   return details::dot_lens<OuterLens, InnerLens>(o, i);
 }
 
 }
