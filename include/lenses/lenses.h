@@ -8,6 +8,12 @@
 namespace lenses
 {
 
+/**
+ * Type declarations expected from a lens
+ * @tparam tag
+ * @tparam whole
+ * @tparam part
+ */
 template<class tag, class whole, class part>
 struct lens_t
 {
@@ -21,6 +27,12 @@ using lens = lens_t<struct lens_tag, whole, part>;
 template<class whole, class part>
 using traversal = lens_t<struct traversal_tag, whole, part>;
 
+
+/**
+ * Builds a simple lens based on a field
+ * @tparam whole
+ * @tparam part
+ */
 template<class whole, class part>
 class field_lens_t : public lens<whole, part>
 {
@@ -47,6 +59,12 @@ private:
    part whole::*m_field;
 };
 
+
+/**
+ * Composition of two lenses => Yields another range
+ * @tparam OuterLens
+ * @tparam InnerLens
+ */
 template<class OuterLens, class InnerLens>
 struct dot_lens
 {
