@@ -19,13 +19,17 @@ struct lens_t
 {
    using whole_type = whole;
    using part_type = part;
+   using tag_type = tag;
 };
 
-template<class whole, class part>
-using lens = lens_t<struct lens_tag, whole, part>;
+struct lens_tag {};
+struct traversal_tag {};
 
 template<class whole, class part>
-using traversal = lens_t<struct traversal_tag, whole, part>;
+using lens = lens_t<lens_tag, whole, part>;
+
+template<class whole, class part>
+using traversal = lens_t<traversal_tag, whole, part>;
 
 
 /**
@@ -68,12 +72,12 @@ private:
 namespace details
 {
 template<class OuterLens, class InnerLens>
-struct dot_lens
+struct dot_lens_lens
 {
    using whole_type = typename OuterLens::whole_type;
    using part_type = typename InnerLens::part_type;
 
-   dot_lens(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
+   dot_lens_lens(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
    {}
 
    OuterLens m_outer;
@@ -93,12 +97,53 @@ struct dot_lens
       });
    }
 };
+
+template<class OuterLens, class InnerLens>
+struct dot_lens_traversal
+{
+   using whole_type = typename OuterLens::whole_type;
+   using part_type = typename InnerLens::part_type;
+
+   dot_lens_traversal(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
+   {}
+
+   OuterLens m_outer;
+   InnerLens m_inner;
+
+   std::vector<part_type> operator()(whole_type const& w) const
+   {
+      return m_inner(m_outer(w));
+   }
+
+   /*
+   template<class OverPart>
+   whole_type operator()(whole_type const& w, OverPart&& f) const
+   {
+      return m_outer(w, [&](auto const& intermediary)
+      {
+         return m_inner(intermediary, f);
+      });
+   }
+    */
+};
+
+template<class OuterLens, class InnerLens>
+dot_lens_lens<OuterLens, InnerLens> dot_impl(OuterLens const& o, InnerLens const& i, lens_tag, lens_tag)
+{
+   return {o, i};
 }
 
 template<class OuterLens, class InnerLens>
-details::dot_lens<OuterLens, InnerLens> dot(OuterLens const& o, InnerLens const& i)
+dot_lens_traversal<OuterLens, InnerLens> dot_impl(OuterLens const& o, InnerLens const& i, lens_tag, traversal_tag)
 {
-   return details::dot_lens<OuterLens, InnerLens>(o, i);
+   return {o, i};
+}
+}
+
+template<class OuterLens, class InnerLens>
+auto dot(OuterLens const& o, InnerLens const& i)
+{
+   return details::dot_impl(o, i, typename OuterLens::tag_type{}, typename InnerLens::tag_type{});
 }
 
 }

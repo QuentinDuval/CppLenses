@@ -74,7 +74,7 @@ TEST_F(LensesShould, compose_into_nested_mutations)
 
 struct all_address_fields : lenses::traversal<address, std::string>
 {
-   std::vector<part_type> operator()(whole_type const& w)
+   std::vector<part_type> operator()(whole_type const& w) const
    {
       return { w.m_road, w.m_city, w.m_state };
    }
@@ -93,12 +93,15 @@ struct all_address_fields : lenses::traversal<address, std::string>
 TEST_F(LensesShould, compose_with_traversals_for_reads)
 {
    auto all_strings = dot(address_lens(), all_address_fields());
-   // auto result = all_strings(sample_account());
-
+   auto result = all_strings(sample_account());
+   ASSERT_EQ(3, result.size());
+   EXPECT_EQ("Road", result[0]);
+   EXPECT_EQ("City", result[1]);
+   EXPECT_EQ("State", result[2]);
 }
 
 TEST_F(LensesShould, compose_with_traversals_for_updates)
 {
-   auto all_strings = dot(address_lens(), all_address_fields());
+   //auto all_strings = dot(address_lens(), all_address_fields());
 
 }
