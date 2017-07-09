@@ -10,7 +10,6 @@ std::ostream& operator<< (std::ostream& os, address const& a)
       << " }";
 }
 
-
 std::ostream& operator<< (std::ostream& os, legal_entity const& le)
 {
    return os

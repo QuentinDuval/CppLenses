@@ -33,6 +33,10 @@ struct LensesShould : ::testing::Test
    }
 };
 
+static std::string add_exclamation_mark(std::string const& s) {
+   return s + "!";
+}
+
 // -----------------------------------------------------------------------------
 // Tests
 // -----------------------------------------------------------------------------
@@ -48,3 +52,15 @@ TEST_F(LensesShould, compose_read)
    EXPECT_EQ("Road", billing_account_road(sample_account()));
 }
 
+TEST_F(LensesShould, allow_direct_mutation)
+{
+   auto new_address = road_lens()(sample_address(), add_exclamation_mark);
+   EXPECT_EQ("Road!", road_lens()(new_address));
+}
+
+TEST_F(LensesShould, compose_into_nested_mutations)
+{
+   auto billing_account_road = dot(address_lens(), road_lens());
+   auto new_billing_account = billing_account_road(sample_account(), add_exclamation_mark);
+   EXPECT_EQ("Road!", billing_account_road(new_billing_account));
+}
