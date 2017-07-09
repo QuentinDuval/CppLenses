@@ -33,7 +33,8 @@ struct LensesShould : ::testing::Test
    }
 };
 
-static std::string add_exclamation_mark(std::string const& s) {
+static std::string add_exclamation_mark(std::string const& s)
+{
    return s + "!";
 }
 
