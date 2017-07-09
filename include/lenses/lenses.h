@@ -22,12 +22,13 @@ template<class whole, class part>
 using traversal = lens_t<struct traversal_tag, whole, part>;
 
 template<class whole, class part>
-struct make_field_lens : lens<whole, part>
+class field_lens_t : public lens<whole, part>
 {
-   make_field_lens(part whole::*field) : m_field(field)
-   {}
+public:
+   using make_field_lens = field_lens_t<whole, part>;
 
-   part whole::*m_field;
+   field_lens_t(part whole::*field) : m_field(field)
+   {}
 
    part const& operator()(whole const& ba) const
    {
@@ -41,6 +42,9 @@ struct make_field_lens : lens<whole, part>
       new_ba.*m_field = f((*this)(ba));
       return new_ba;
    }
+
+private:
+   part whole::*m_field;
 };
 
 template<class OuterLens, class InnerLens>
