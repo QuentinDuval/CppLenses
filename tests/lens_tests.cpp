@@ -52,7 +52,7 @@ TEST_F(LensesShould, read_direct_field)
 
 TEST_F(LensesShould, compose_read)
 {
-   EXPECT_EQ("Road", get_in(sample_account(), address_lens(), road_lens()));
+   EXPECT_EQ("Road", get_in(sample_account(), address_lens() / road_lens()));
 }
 
 TEST_F(LensesShould, allow_direct_mutation)
@@ -63,7 +63,7 @@ TEST_F(LensesShould, allow_direct_mutation)
 
 TEST_F(LensesShould, compose_into_nested_mutations)
 {
-   auto billing_account_road = dot(address_lens(), road_lens());
+   auto billing_account_road = address_lens() / road_lens();
    auto r = update_in(sample_account(), billing_account_road, add_exclamation_mark);
    EXPECT_EQ("Road!", get_in(r, billing_account_road));
 }
@@ -76,7 +76,7 @@ struct all_address_fields : lenses::traversal<address, std::string>
 {
    std::vector<part_type> operator()(whole_type const& w) const
    {
-      return { w.m_road, w.m_city, w.m_state };
+      return {w.m_road, w.m_city, w.m_state};
    }
 
    template<class OverPart>
@@ -93,8 +93,7 @@ struct all_address_fields : lenses::traversal<address, std::string>
 
 TEST_F(LensesShould, compose_lens_with_traversals_for_reads)
 {
-   auto all_strings = dot(address_lens(), all_address_fields());
-   auto result = all_strings(sample_account());
+   auto result = get_in(sample_account(), address_lens() / all_address_fields());
    ASSERT_EQ(3, result.size());
    EXPECT_EQ("Road", result[0]);
    EXPECT_EQ("City", result[1]);
@@ -103,13 +102,12 @@ TEST_F(LensesShould, compose_lens_with_traversals_for_reads)
 
 TEST_F(LensesShould, compose_lens_with_traversals_for_updates)
 {
-   auto all_strings = dot(address_lens(), all_address_fields());
-   auto new_account = all_strings(sample_account(), add_exclamation_mark);
-   auto result = all_strings(new_account);
-   ASSERT_EQ(3, result.size());
-   EXPECT_EQ("Road!", result[0]);
-   EXPECT_EQ("City!", result[1]);
-   EXPECT_EQ("State!", result[2]);
+   auto new_account = update_in(sample_account(), address_lens() / all_address_fields(), add_exclamation_mark);
+   auto new_fields = get_in(new_account, address_lens() / all_address_fields());
+   ASSERT_EQ(3, new_fields.size());
+   EXPECT_EQ("Road!", new_fields[0]);
+   EXPECT_EQ("City!", new_fields[1]);
+   EXPECT_EQ("State!", new_fields[2]);
 }
 
 // -----------------------------------------------------------------------------
@@ -118,20 +116,19 @@ TEST_F(LensesShould, compose_lens_with_traversals_for_updates)
 
 TEST_F(LensesShould, compose_traversal_with_traversals_for_reads)
 {
-   auto all_fields_characters = dot(all_address_fields(), lenses::all_characters());
-   auto result = all_fields_characters(sample_address());
+   auto result = get_in(sample_address(), all_address_fields() / lenses::all_characters());
    ASSERT_EQ(13, result.size());
 }
 
 TEST_F(LensesShould, compose_traversal_with_traversals_for_updates)
 {
-   auto all_fields_characters = dot(all_address_fields(), lenses::all_characters());
-   auto new_address = all_fields_characters(sample_address(), [](char c) { return std::tolower(c); });
-   auto result = all_address_fields()(new_address);
-   ASSERT_EQ(3, result.size());
-   EXPECT_EQ("road", result[0]);
-   EXPECT_EQ("city", result[1]);
-   EXPECT_EQ("state", result[2]);
+   auto new_address = update_in(sample_address(), all_address_fields() / lenses::all_characters(), [](char c)
+   { return std::tolower(c); });
+   auto new_fields = get_in(new_address, all_address_fields());
+   ASSERT_EQ(3, new_fields.size());
+   EXPECT_EQ("road", new_fields[0]);
+   EXPECT_EQ("city", new_fields[1]);
+   EXPECT_EQ("state", new_fields[2]);
 }
 
 // -----------------------------------------------------------------------------
@@ -140,10 +137,11 @@ TEST_F(LensesShould, compose_traversal_with_traversals_for_updates)
 
 TEST_F(LensesShould, compose_lens_with_traversal_with_traversals_for_updates)
 {
-   auto all_strings = dot(address_lens(), all_address_fields());
-   auto all_address_chars = dot(all_strings, lenses::all_characters());
-   auto new_address = all_address_chars(sample_account(), [](char c) { return std::tolower(c); });
-   auto result = all_strings(new_address);
+   auto new_address = update_in(
+      sample_account(),
+      address_lens() / all_address_fields() / lenses::all_characters(),
+      [](char c) { return std::tolower(c); });
+   auto result = get_in(new_address, address_lens() / all_address_fields());
    ASSERT_EQ(3, result.size());
    EXPECT_EQ("road", result[0]);
    EXPECT_EQ("city", result[1]);

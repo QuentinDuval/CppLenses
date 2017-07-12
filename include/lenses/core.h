@@ -150,16 +150,10 @@ dot_traversal_traversal<OuterLens, InnerLens> dot_impl(OuterLens const& o, Inner
 }
 
 template<class OuterLens, class InnerLens>
-auto dot(OuterLens const& o, InnerLens const& i)
+auto operator/(OuterLens const& o, InnerLens const& i)
 {
    return details::dot_impl(o, i, typename OuterLens::tag_type{}, typename InnerLens::tag_type{});
 }
-
-template<class OuterLens, class InnerLens, class ...Lenses>
-auto dot(OuterLens const& o, InnerLens const& i, Lenses const& ...lenses)
-{
-   return dot(dot(o, i), lenses...);
-};
 
 
 /**
@@ -169,12 +163,6 @@ template <class whole, class lens>
 auto get_in(whole const& w, lens const& l)
 {
    return l(w);
-};
-
-template <class whole, class lens, class ...lenses>
-auto get_in(whole const& w, lens const& l, lenses const& ...ls)
-{
-   return get_in(w, dot(l, ls...));
 };
 
 template <class whole, class lens, class over>
