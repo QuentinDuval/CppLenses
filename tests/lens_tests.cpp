@@ -57,15 +57,15 @@ TEST_F(LensesShould, compose_read)
 
 TEST_F(LensesShould, allow_direct_mutation)
 {
-   auto new_address = road_lens()(sample_address(), add_exclamation_mark);
-   EXPECT_EQ("Road!", road_lens()(new_address));
+   auto r = update_in(sample_address(), road_lens(), add_exclamation_mark);
+   EXPECT_EQ("Road!", get_in(r, road_lens()));
 }
 
 TEST_F(LensesShould, compose_into_nested_mutations)
 {
    auto billing_account_road = dot(address_lens(), road_lens());
-   auto new_billing_account = billing_account_road(sample_account(), add_exclamation_mark);
-   EXPECT_EQ("Road!", billing_account_road(new_billing_account));
+   auto r = update_in(sample_account(), billing_account_road, add_exclamation_mark);
+   EXPECT_EQ("Road!", get_in(r, billing_account_road));
 }
 
 // -----------------------------------------------------------------------------

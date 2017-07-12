@@ -176,6 +176,12 @@ auto get_in(whole const& w, lens const& l, lenses const& ...ls)
 {
    return get_in(w, dot(l, ls...));
 };
+
+template <class whole, class lens, class over>
+auto update_in(whole const& w, lens const& l, over&& f)
+{
+   return l(w, f);
+};
 }
 
 #endif //CPPLENSES_CORE_H
