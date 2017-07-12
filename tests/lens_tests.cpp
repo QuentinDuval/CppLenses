@@ -47,13 +47,12 @@ static std::string add_exclamation_mark(std::string const& s)
 
 TEST_F(LensesShould, read_direct_field)
 {
-   EXPECT_EQ("Road", road_lens()(sample_address()));
+   EXPECT_EQ("Road", get_in(sample_address(), road_lens()));
 }
 
 TEST_F(LensesShould, compose_read)
 {
-   auto billing_account_road = dot(address_lens(), road_lens());
-   EXPECT_EQ("Road", billing_account_road(sample_account()));
+   EXPECT_EQ("Road", get_in(sample_account(), address_lens(), road_lens()));
 }
 
 TEST_F(LensesShould, allow_direct_mutation)
