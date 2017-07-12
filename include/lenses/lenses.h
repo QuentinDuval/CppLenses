@@ -73,6 +73,7 @@ namespace details
 {
 template<class OuterLens, class InnerLens>
 struct dot_lens_lens
+   : lens<typename OuterLens::whole_type, typename InnerLens::part_type>
 {
    using whole_type = typename OuterLens::whole_type;
    using part_type = typename InnerLens::part_type;
@@ -100,6 +101,7 @@ struct dot_lens_lens
 
 template<class OuterLens, class InnerLens>
 struct dot_lens_traversal
+   : traversal<typename OuterLens::whole_type, typename InnerLens::part_type>
 {
    using whole_type = typename OuterLens::whole_type;
    using part_type = typename InnerLens::part_type;
