@@ -7,5 +7,6 @@
 
 #include "lenses/core.h"
 #include "lenses/strings.h"
+#include "lenses/utils.h"
 
 #endif //CPPLENSES_LENSES_H
