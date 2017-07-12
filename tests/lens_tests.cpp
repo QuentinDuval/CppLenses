@@ -138,3 +138,15 @@ TEST_F(LensesShould, compose_traversal_with_traversals_for_updates)
 // -----------------------------------------------------------------------------
 // Tests (Path of length 3)
 // -----------------------------------------------------------------------------
+
+TEST_F(LensesShould, compose_lens_with_traversal_with_traversals_for_updates)
+{
+   auto all_strings = dot(address_lens(), all_address_fields());
+   auto all_address_chars = dot(all_strings, lenses::all_characters());
+   auto new_address = all_address_chars(sample_account(), [](char c) { return std::tolower(c); });
+   auto result = all_strings(new_address);
+   ASSERT_EQ(3, result.size());
+   EXPECT_EQ("road", result[0]);
+   EXPECT_EQ("city", result[1]);
+   EXPECT_EQ("state", result[2]);
+}
