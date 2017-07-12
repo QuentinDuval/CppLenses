@@ -122,8 +122,10 @@ TEST_F(LensesShould, compose_traversal_with_traversals_for_reads)
 
 TEST_F(LensesShould, compose_traversal_with_traversals_for_updates)
 {
-   auto new_address = update_in(sample_address(), all_address_fields() / lenses::all_characters(), [](char c)
-   { return std::tolower(c); });
+   auto new_address = update_in(
+      sample_address(), all_address_fields() / lenses::all_characters(),
+      [](char c)
+      { return std::tolower(c); });
    auto new_fields = get_in(new_address, all_address_fields());
    ASSERT_EQ(3, new_fields.size());
    EXPECT_EQ("road", new_fields[0]);
@@ -140,7 +142,8 @@ TEST_F(LensesShould, compose_lens_with_traversal_with_traversals_for_updates)
    auto new_address = update_in(
       sample_account(),
       address_lens() / all_address_fields() / lenses::all_characters(),
-      [](char c) { return std::tolower(c); });
+      [](char c)
+      { return std::tolower(c); });
    auto result = get_in(new_address, address_lens() / all_address_fields());
    ASSERT_EQ(3, result.size());
    EXPECT_EQ("road", result[0]);
