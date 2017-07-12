@@ -177,6 +177,8 @@ dot_traversal_traversal<OuterLens, InnerLens> dot_impl(OuterLens const& o, Inner
 {
    return {o, i};
 }
+
+//TODO - traversal - lens
 }
 
 template<class OuterLens, class InnerLens>
