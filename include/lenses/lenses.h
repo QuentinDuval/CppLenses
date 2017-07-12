@@ -129,6 +129,39 @@ struct dot_lens_traversal
 };
 
 template<class OuterLens, class InnerLens>
+struct dot_traversal_traversal
+   : traversal<typename OuterLens::whole_type, typename InnerLens::part_type>
+{
+   using whole_type = typename OuterLens::whole_type;
+   using part_type = typename InnerLens::part_type;
+
+   dot_traversal_traversal(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
+   {}
+
+   OuterLens m_outer;
+   InnerLens m_inner;
+
+   std::vector<part_type> operator()(whole_type const& w) const
+   {
+      std::vector<part_type> out;
+      for (auto const& o: m_outer(w))
+         for (auto const& i: m_inner(o))
+            out.push_back(i);
+      return out;
+   }
+
+
+   template<class OverPart>
+   whole_type operator()(whole_type const& w, OverPart&& f) const
+   {
+      return m_outer(w, [&](auto const& intermediary)
+      {
+         return m_inner(intermediary, f);
+      });
+   }
+};
+
+template<class OuterLens, class InnerLens>
 dot_lens_lens<OuterLens, InnerLens> dot_impl(OuterLens const& o, InnerLens const& i, lens_tag, lens_tag)
 {
    return {o, i};
@@ -136,6 +169,12 @@ dot_lens_lens<OuterLens, InnerLens> dot_impl(OuterLens const& o, InnerLens const
 
 template<class OuterLens, class InnerLens>
 dot_lens_traversal<OuterLens, InnerLens> dot_impl(OuterLens const& o, InnerLens const& i, lens_tag, traversal_tag)
+{
+   return {o, i};
+}
+
+template<class OuterLens, class InnerLens>
+dot_traversal_traversal<OuterLens, InnerLens> dot_impl(OuterLens const& o, InnerLens const& i, traversal_tag, traversal_tag)
 {
    return {o, i};
 }

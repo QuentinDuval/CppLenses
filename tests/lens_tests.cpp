@@ -3,6 +3,7 @@
 #include "billing_account.h"
 #include "lenses/lenses.h"
 
+#include <algorithm>
 #include <vector>
 
 
@@ -41,7 +42,7 @@ static std::string add_exclamation_mark(std::string const& s)
 }
 
 // -----------------------------------------------------------------------------
-// Tests (Lens)
+// Tests (Lens - Lens)
 // -----------------------------------------------------------------------------
 
 TEST_F(LensesShould, read_direct_field)
@@ -69,7 +70,7 @@ TEST_F(LensesShould, compose_into_nested_mutations)
 }
 
 // -----------------------------------------------------------------------------
-// Tests (Traversal)
+// Tests (Lens - Traversal)
 // -----------------------------------------------------------------------------
 
 struct all_address_fields : lenses::traversal<address, std::string>
@@ -91,7 +92,7 @@ struct all_address_fields : lenses::traversal<address, std::string>
    }
 };
 
-TEST_F(LensesShould, compose_with_traversals_for_reads)
+TEST_F(LensesShould, compose_lens_with_traversals_for_reads)
 {
    auto all_strings = dot(address_lens(), all_address_fields());
    auto result = all_strings(sample_account());
@@ -101,7 +102,7 @@ TEST_F(LensesShould, compose_with_traversals_for_reads)
    EXPECT_EQ("State", result[2]);
 }
 
-TEST_F(LensesShould, compose_with_traversals_for_updates)
+TEST_F(LensesShould, compose_lens_with_traversals_for_updates)
 {
    auto all_strings = dot(address_lens(), all_address_fields());
    auto new_account = all_strings(sample_account(), add_exclamation_mark);
@@ -111,3 +112,46 @@ TEST_F(LensesShould, compose_with_traversals_for_updates)
    EXPECT_EQ("City!", result[1]);
    EXPECT_EQ("State!", result[2]);
 }
+
+// -----------------------------------------------------------------------------
+// Tests (Traversal - Traversal)
+// -----------------------------------------------------------------------------
+
+struct all_characters : lenses::traversal<std::string, char>
+{
+   std::vector<part_type> operator()(whole_type const& w) const
+   {
+      return std::vector<part_type>(w.begin(), w.end());
+   }
+
+   template<class OverPart>
+   whole_type operator()(whole_type const& w, OverPart&& f) const
+   {
+      whole_type out;
+      out.reserve(w.size());
+      std::transform(w.begin(), w.end(), std::back_inserter(out), f);
+      return out;
+   }
+};
+
+TEST_F(LensesShould, compose_traversal_with_traversals_for_reads)
+{
+   auto all_fields_characters = dot(all_address_fields(), all_characters());
+   auto result = all_fields_characters(sample_address());
+   ASSERT_EQ(13, result.size());
+}
+
+TEST_F(LensesShould, compose_traversal_with_traversals_for_updates)
+{
+   auto all_fields_characters = dot(all_address_fields(), all_characters());
+   auto new_address = all_fields_characters(sample_address(), [](char c) { return std::tolower(c); });
+   auto result = all_address_fields()(new_address);
+   ASSERT_EQ(3, result.size());
+   EXPECT_EQ("road", result[0]);
+   EXPECT_EQ("city", result[1]);
+   EXPECT_EQ("state", result[2]);
+}
+
+// -----------------------------------------------------------------------------
+// Tests (Path of length 3)
+// -----------------------------------------------------------------------------
