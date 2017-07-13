@@ -11,6 +11,8 @@
 // Test Fixture
 // -----------------------------------------------------------------------------
 
+using namespace lenses;
+
 MAKE_LENS(address, billing_account, address);
 MAKE_LENS(road, address, std::string);
 
