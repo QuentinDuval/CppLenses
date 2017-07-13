@@ -11,11 +11,8 @@
 // Test Fixture
 // -----------------------------------------------------------------------------
 
-struct address_l : lenses::make_field_lens<billing_account, address, &billing_account::m_address>
-{};
-
-struct road_l : lenses::make_field_lens<address, std::string, &address::m_road>
-{};
+MAKE_LENS(address, billing_account, address);
+MAKE_LENS(road, address, std::string);
 
 struct LensesShould : ::testing::Test
 {

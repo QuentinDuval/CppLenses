@@ -31,6 +31,14 @@ public:
       return new_ba;
    }
 };
+
+/**
+ * Helper macro to define a lens, based on the conventions:
+ * - the member must be public and starting with "m_"
+ * - the generated lens will be named "name" followed by "_l"
+ */
+#define MAKE_LENS(name, whole, part) \
+   using name##_l = lenses::make_field_lens<whole, part, &whole::m_##name>;
 }
 
 #endif //CPPLENSES_UTILS_H
