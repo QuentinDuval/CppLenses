@@ -15,13 +15,13 @@ namespace lenses
 {
 struct all_characters : lenses::traversal<std::string, char>
 {
-   std::vector<part_type> operator()(whole_type const& w) const
+   std::vector<part_type> view(whole_type const& w) const
    {
       return std::vector<part_type>(w.begin(), w.end());
    }
 
    template<class OverPart>
-   whole_type operator()(whole_type const& w, OverPart&& f) const
+   whole_type over(whole_type const& w, OverPart&& f) const
    {
       whole_type out;
       out.reserve(w.size());

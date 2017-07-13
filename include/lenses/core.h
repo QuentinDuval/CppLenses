@@ -51,17 +51,17 @@ struct dot_lens_lens
    OuterLens m_outer;
    InnerLens m_inner;
 
-   part_type const& operator()(whole_type const& w) const
+   part_type const& view(whole_type const& w) const
    {
-      return m_inner(m_outer(w));
+      return m_inner.view(m_outer.view(w));
    }
 
    template<class OverPart>
-   whole_type operator()(whole_type const& w, OverPart&& f) const
+   whole_type over(whole_type const& w, OverPart&& f) const
    {
-      return m_outer(w, [&](auto const& intermediary)
+      return m_outer.over(w, [&](auto const& intermediary)
       {
-         return m_inner(intermediary, f);
+         return m_inner.over(intermediary, f);
       });
    }
 };
@@ -79,18 +79,18 @@ struct dot_lens_traversal
    OuterLens m_outer;
    InnerLens m_inner;
 
-   std::vector<part_type> operator()(whole_type const& w) const
+   std::vector<part_type> view(whole_type const& w) const
    {
-      return m_inner(m_outer(w));
+      return m_inner.view(m_outer.view(w));
    }
 
 
    template<class OverPart>
-   whole_type operator()(whole_type const& w, OverPart&& f) const
+   whole_type over(whole_type const& w, OverPart&& f) const
    {
-      return m_outer(w, [&](auto const& intermediary)
+      return m_outer.over(w, [&](auto const& intermediary)
       {
-         return m_inner(intermediary, f);
+         return m_inner.over(intermediary, f);
       });
    }
 };
@@ -108,22 +108,22 @@ struct dot_traversal_traversal
    OuterLens m_outer;
    InnerLens m_inner;
 
-   std::vector<part_type> operator()(whole_type const& w) const
+   std::vector<part_type> view(whole_type const& w) const
    {
       std::vector<part_type> out;
-      for (auto const& o: m_outer(w))
-         for (auto const& i: m_inner(o))
+      for (auto const& o: m_outer.view(w))
+         for (auto const& i: m_inner.view(o))
             out.push_back(i);
       return out;
    }
 
 
    template<class OverPart>
-   whole_type operator()(whole_type const& w, OverPart&& f) const
+   whole_type over(whole_type const& w, OverPart&& f) const
    {
-      return m_outer(w, [&](auto const& intermediary)
+      return m_outer.over(w, [&](auto const& intermediary)
       {
-         return m_inner(intermediary, f);
+         return m_inner.over(intermediary, f);
       });
    }
 };
@@ -162,13 +162,13 @@ auto operator/(OuterLens const& o, InnerLens const& i)
 template <class whole, class lens>
 auto get_in(whole const& w, lens const& l)
 {
-   return l(w);
+   return l.view(w);
 };
 
 template <class whole, class lens, class over>
 auto update_in(whole const& w, lens const& l, over&& f)
 {
-   return l(w, f);
+   return l.over(w, f);
 };
 }
 

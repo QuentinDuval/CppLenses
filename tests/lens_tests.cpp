@@ -74,13 +74,13 @@ TEST_F(LensesShould, compose_into_nested_mutations)
 
 struct all_address_fields : lenses::traversal<address, std::string>
 {
-   std::vector<part_type> operator()(whole_type const& w) const
+   std::vector<part_type> view(whole_type const& w) const
    {
       return {w.m_road, w.m_city, w.m_state};
    }
 
    template<class OverPart>
-   whole_type operator()(whole_type const& w, OverPart&& f) const
+   whole_type over(whole_type const& w, OverPart&& f) const
    {
       //TODO - Other possibility would be to apply f on the vector... more general, more risky
       auto copy = w;

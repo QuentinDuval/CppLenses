@@ -23,16 +23,16 @@ public:
    field_lens_t(part whole::*field) : m_field(field)
    {}
 
-   part const& operator()(whole const& ba) const
+   part const& view(whole const& ba) const
    {
       return ba.*m_field;
    }
 
    template<class OverPart>
-   whole operator()(whole const& ba, OverPart&& f) const
+   whole over(whole const& ba, OverPart&& f) const
    {
       auto new_ba = ba;
-      new_ba.*m_field = f((*this)(ba));
+      new_ba.*m_field = f(view(ba));
       return new_ba;
    }
 
