@@ -14,7 +14,7 @@ namespace lenses
  * @tparam part
  */
 template<class tag, class whole, class part>
-struct lens_t
+struct optic
 {
    using whole_type = whole;
    using part_type = part;
@@ -25,10 +25,10 @@ struct lens_tag {};
 struct traversal_tag {};
 
 template<class whole, class part>
-using lens = lens_t<lens_tag, whole, part>;
+using lens = optic<lens_tag, whole, part>;
 
 template<class whole, class part>
-using traversal = lens_t<traversal_tag, whole, part>;
+using traversal = optic<traversal_tag, whole, part>;
 
 
 /**
