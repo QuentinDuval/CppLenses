@@ -11,17 +11,11 @@
 // Test Fixture
 // -----------------------------------------------------------------------------
 
-struct address_lens : lenses::field_lens_t<billing_account, address>
-{
-   address_lens() : make_field_lens(&billing_account::m_address)
-   {}
-};
+struct address_l : lenses::make_field_lens<billing_account, address, &billing_account::m_address>
+{};
 
-struct road_lens : lenses::field_lens_t<address, std::string>
-{
-   road_lens() : make_field_lens(&address::m_road)
-   {}
-};
+struct road_l : lenses::make_field_lens<address, std::string, &address::m_road>
+{};
 
 struct LensesShould : ::testing::Test
 {
@@ -47,23 +41,23 @@ static std::string add_exclamation_mark(std::string const& s)
 
 TEST_F(LensesShould, read_direct_field)
 {
-   EXPECT_EQ("Road", get_in(sample_address(), road_lens()));
+   EXPECT_EQ("Road", get_in(sample_address(), road_l()));
 }
 
 TEST_F(LensesShould, compose_read)
 {
-   EXPECT_EQ("Road", get_in(sample_account(), address_lens() / road_lens()));
+   EXPECT_EQ("Road", get_in(sample_account(), address_l() / road_l()));
 }
 
 TEST_F(LensesShould, allow_direct_mutation)
 {
-   auto r = update_in(sample_address(), road_lens(), add_exclamation_mark);
-   EXPECT_EQ("Road!", get_in(r, road_lens()));
+   auto r = update_in(sample_address(), road_l(), add_exclamation_mark);
+   EXPECT_EQ("Road!", get_in(r, road_l()));
 }
 
 TEST_F(LensesShould, compose_into_nested_mutations)
 {
-   auto billing_account_road = address_lens() / road_lens();
+   auto billing_account_road = address_l() / road_l();
    auto r = update_in(sample_account(), billing_account_road, add_exclamation_mark);
    EXPECT_EQ("Road!", get_in(r, billing_account_road));
 }
@@ -93,7 +87,7 @@ struct all_address_fields : lenses::traversal<address, std::string>
 
 TEST_F(LensesShould, compose_lens_with_traversals_for_reads)
 {
-   auto result = get_in(sample_account(), address_lens() / all_address_fields());
+   auto result = get_in(sample_account(), address_l() / all_address_fields());
    ASSERT_EQ(3, result.size());
    EXPECT_EQ("Road", result[0]);
    EXPECT_EQ("City", result[1]);
@@ -102,8 +96,8 @@ TEST_F(LensesShould, compose_lens_with_traversals_for_reads)
 
 TEST_F(LensesShould, compose_lens_with_traversals_for_updates)
 {
-   auto new_account = update_in(sample_account(), address_lens() / all_address_fields(), add_exclamation_mark);
-   auto new_fields = get_in(new_account, address_lens() / all_address_fields());
+   auto new_account = update_in(sample_account(), address_l() / all_address_fields(), add_exclamation_mark);
+   auto new_fields = get_in(new_account, address_l() / all_address_fields());
    ASSERT_EQ(3, new_fields.size());
    EXPECT_EQ("Road!", new_fields[0]);
    EXPECT_EQ("City!", new_fields[1]);
@@ -141,10 +135,10 @@ TEST_F(LensesShould, compose_lens_with_traversal_with_traversals_for_updates)
 {
    auto new_address = update_in(
       sample_account(),
-      address_lens() / all_address_fields() / lenses::all_characters(),
+      address_l() / all_address_fields() / lenses::all_characters(),
       [](char c)
       { return std::tolower(c); });
-   auto result = get_in(new_address, address_lens() / all_address_fields());
+   auto result = get_in(new_address, address_l() / all_address_fields());
    ASSERT_EQ(3, result.size());
    EXPECT_EQ("road", result[0]);
    EXPECT_EQ("city", result[1]);

@@ -14,30 +14,22 @@ namespace lenses
  * @tparam whole
  * @tparam part
  */
-template<class whole, class part>
-class field_lens_t : public lens<whole, part>
+template<class whole, class part, part whole::*member>
+class make_field_lens : public lens<whole, part>
 {
 public:
-   using make_field_lens = field_lens_t<whole, part>;
-
-   field_lens_t(part whole::*field) : m_field(field)
-   {}
-
    part const& view(whole const& ba) const
    {
-      return ba.*m_field;
+      return ba.*member;
    }
 
    template<class OverPart>
    whole over(whole const& ba, OverPart&& f) const
    {
       auto new_ba = ba;
-      new_ba.*m_field = f(view(ba));
+      new_ba.*member = f(view(ba));
       return new_ba;
    }
-
-private:
-   part whole::*m_field;
 };
 }
 
