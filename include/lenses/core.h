@@ -39,25 +39,25 @@ using traversal = optic<traversal_tag, whole, part>;
 namespace details
 {
 template<class OuterLens, class InnerLens>
-struct dot_lens_lens
-   : lens<typename OuterLens::whole_type, typename InnerLens::part_type>
+class dot_lens_lens
+   : public lens<typename OuterLens::whole_type, typename InnerLens::part_type>
 {
-   using whole_type = typename OuterLens::whole_type;
-   using part_type = typename InnerLens::part_type;
+   using whole = typename OuterLens::whole_type;
+   using part = typename InnerLens::part_type;
+   OuterLens m_outer;
+   InnerLens m_inner;
 
+public:
    dot_lens_lens(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
    {}
 
-   OuterLens m_outer;
-   InnerLens m_inner;
-
-   part_type const& view(whole_type const& w) const
+   part const& view(whole const& w) const
    {
       return m_inner.view(m_outer.view(w));
    }
 
    template<class OverPart>
-   whole_type over(whole_type const& w, OverPart&& f) const
+   whole over(whole const& w, OverPart&& f) const
    {
       return m_outer.over(w, [&](auto const& intermediary)
       {
@@ -67,26 +67,26 @@ struct dot_lens_lens
 };
 
 template<class OuterLens, class InnerLens>
-struct dot_lens_traversal
-   : traversal<typename OuterLens::whole_type, typename InnerLens::part_type>
+class dot_lens_traversal
+   : public traversal<typename OuterLens::whole_type, typename InnerLens::part_type>
 {
-   using whole_type = typename OuterLens::whole_type;
-   using part_type = typename InnerLens::part_type;
+   using whole = typename OuterLens::whole_type;
+   using part = typename InnerLens::part_type;
+   OuterLens m_outer;
+   InnerLens m_inner;
 
+public:
    dot_lens_traversal(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
    {}
 
-   OuterLens m_outer;
-   InnerLens m_inner;
-
-   std::vector<part_type> view(whole_type const& w) const
+   std::vector<part> view(whole const& w) const
    {
       return m_inner.view(m_outer.view(w));
    }
 
 
    template<class OverPart>
-   whole_type over(whole_type const& w, OverPart&& f) const
+   whole over(whole const& w, OverPart&& f) const
    {
       return m_outer.over(w, [&](auto const& intermediary)
       {
@@ -96,21 +96,21 @@ struct dot_lens_traversal
 };
 
 template<class OuterLens, class InnerLens>
-struct dot_traversal_traversal
-   : traversal<typename OuterLens::whole_type, typename InnerLens::part_type>
+class dot_traversal_traversal
+   : public traversal<typename OuterLens::whole_type, typename InnerLens::part_type>
 {
-   using whole_type = typename OuterLens::whole_type;
-   using part_type = typename InnerLens::part_type;
-
-   dot_traversal_traversal(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
-   {}
-
+   using whole = typename OuterLens::whole_type;
+   using part = typename InnerLens::part_type;
    OuterLens m_outer;
    InnerLens m_inner;
 
-   std::vector<part_type> view(whole_type const& w) const
+public:
+   dot_traversal_traversal(OuterLens outer, InnerLens inner) : m_outer(outer), m_inner(inner)
+   {}
+
+   std::vector<part> view(whole const& w) const
    {
-      std::vector<part_type> out;
+      std::vector<part> out;
       for (auto const& o: m_outer.view(w))
          for (auto const& i: m_inner.view(o))
             out.push_back(i);
@@ -119,7 +119,7 @@ struct dot_traversal_traversal
 
 
    template<class OverPart>
-   whole_type over(whole_type const& w, OverPart&& f) const
+   whole over(whole const& w, OverPart&& f) const
    {
       return m_outer.over(w, [&](auto const& intermediary)
       {
